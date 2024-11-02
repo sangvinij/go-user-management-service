@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    container_name: user_management_app
+    image: user_management_app:latest
+    restart: always
+    init: true
+    ports:
+      - "${PORT}:8000"
+    env_file:
+      - .env
+    command: ["go", "run", "src/cmd/main.go"]
+    volumes:
+      - .:/app
