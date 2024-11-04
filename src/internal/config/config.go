@@ -2,38 +2,59 @@ package config
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/sirupsen/logrus"
 	"os"
 	"strconv"
+	"strings"
 )
 
-type Config struct {
-	LogLevel logrus.Level
-	Host     string
-	Port     int
+var AppConfig *config
+
+type config struct {
+	LOGLEVEL string
+	HOST     string
+	PORT     int
 }
 
-func GetConfig() (*Config, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
-	}
+func init() {
+	AppConfig = &config{}
+	AppConfig.LoadConfig()
+}
 
-	logLevel, err := logrus.ParseLevel(os.Getenv("LOG_LEVEL"))
-	if err != nil {
-		logLevel = logrus.InfoLevel
-	}
+func (c *config) LoadConfig() {
+	godotenv.Load()
 
-	host := os.Getenv("HOST")
-	portStr := os.Getenv("PORT")
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		port = 8000
-	}
+	c.LOGLEVEL = c.getEnv("LOG_LEVEL", "info")
+	c.HOST = c.getEnv("HOST", "0.0.0.0")
+	c.PORT = c.getEnvAsInt("PORT", 8000)
+}
 
-	return &Config{
-		LogLevel: logLevel,
-		Host:     host,
-		Port:     port,
-	}, nil
+func (c *config) getEnv(key string, defaultVal string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultVal
+}
+
+func (c *config) getEnvAsInt(name string, defaultVal int) int {
+	valueStr := c.getEnv(name, "")
+	if value, err := strconv.Atoi(valueStr); err == nil {
+		return value
+	}
+	return defaultVal
+}
+
+func (c *config) getEnvAsBool(name string, defaultVal bool) bool {
+	valStr := c.getEnv(name, "")
+	if val, err := strconv.ParseBool(valStr); err == nil {
+		return val
+	}
+	return defaultVal
+}
+
+func (c *config) getEnvAsSlice(name string, defaultVal []string, sep string) []string {
+	valStr := c.getEnv(name, "")
+	if valStr == "" {
+		return defaultVal
+	}
+	return strings.Split(valStr, sep)
 }

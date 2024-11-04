@@ -6,17 +6,17 @@ import (
 	"go-user-management-service/src/internal/config"
 	"go-user-management-service/src/internal/logger"
 	"net/http"
+	"runtime"
 )
 
+var _, file, line, _ = runtime.Caller(0)
+var log = logger.SetupLogger(file, line)
+
 func main() {
-	cfg, err := config.GetConfig()
+	log.Infof("Server starting on %s:%d...", config.AppConfig.HOST, config.AppConfig.PORT)
+	apiRouter := routers.GetRouter()
 
-	log := logger.SetupLogger(cfg)
-
-	log.Infof("Server starting on %s:%d...", cfg.Host, cfg.Port)
-	apiRouter := routers.GetRouter(log)
-
-	err = http.ListenAndServe(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), apiRouter)
+	err := http.ListenAndServe(fmt.Sprintf("%s:%d", config.AppConfig.HOST, config.AppConfig.PORT), apiRouter)
 	if err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
