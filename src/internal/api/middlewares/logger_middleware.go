@@ -37,9 +37,9 @@ func LoggingMiddleware() func(http.Handler) http.Handler {
 			bodyBytes, _ := io.ReadAll(r.Body)
 			r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 			log.WithFields(logrus.Fields{
-				"request_url":  r.URL.Path,
-				"method":       r.Method,
-				"request_body": string(bodyBytes),
+				"request_url":    r.URL.Path,
+				"request_method": r.Method,
+				"request_body":   string(bodyBytes),
 			}).Info("Receive request from client")
 
 			next.ServeHTTP(rw, r)

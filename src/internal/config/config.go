@@ -10,9 +10,11 @@ import (
 var AppConfig *config
 
 type config struct {
-	LOGLEVEL string
-	HOST     string
-	PORT     int
+	LOGLEVEL           string
+	HOST               string
+	PORT               int
+	ELASTICSEARCH_HOST string
+	ELASTICSEARCH_PORT int
 }
 
 func init() {
@@ -26,6 +28,8 @@ func (c *config) LoadConfig() {
 	c.LOGLEVEL = c.getEnv("LOG_LEVEL", "info")
 	c.HOST = c.getEnv("HOST", "0.0.0.0")
 	c.PORT = c.getEnvAsInt("PORT", 8000)
+	c.ELASTICSEARCH_HOST = c.getEnv("ELASTICSEARCH_HOST", "http://localhost")
+	c.ELASTICSEARCH_PORT = c.getEnvAsInt("ELASTICSEARCH_PORT", 9200)
 }
 
 func (c *config) getEnv(key string, defaultVal string) string {

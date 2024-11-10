@@ -1,9 +1,8 @@
 package logger
 
 import (
-	"github.com/olivere/elastic/v7"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/sohlich/elogrus.v7"
+	"go-user-management-service/src/internal/integrations/elasticsearch"
 	"os"
 )
 
@@ -19,18 +18,17 @@ func SetupLogger(file string, line int) *logrus.Logger {
 		log.SetLevel(level)
 	}
 
-	elasticURL := "http://localhost:9200"
-	client, err := elastic.NewClient(elastic.SetURL(elasticURL), elastic.SetSniff(false))
+	esClient, err := elasticsearch.NewElasticClient()
 	if err != nil {
-		log.Fatalf("Ошибка при подключении к Elasticsearch: %v", err)
+		log.Fatalf("elasticsearch client error: %v", err)
 	}
 
-	hook, err := elogrus.NewAsyncElasticHook(client, "localhost", level, "go-logs")
-	if err != nil {
-		log.Fatalf("Ошибка при создании Elasticsearch хука: %v", err)
-	}
-	log.AddHook(hook)
 	log.AddHook(GetLogHook(file, line))
 
+	hook, err := NewElasticHook(esClient, "go-logs")
+	if err != nil {
+		log.Fatalf("elasticsearch hook creation error: %v", err)
+	}
+	log.AddHook(hook)
 	return log
 }
