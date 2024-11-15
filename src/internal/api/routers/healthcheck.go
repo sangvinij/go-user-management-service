@@ -1,12 +1,10 @@
 package routers
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/gofiber/fiber/v2"
 	"go-user-management-service/src/internal/api/handlers"
 )
 
-func GetHealthCheckRouter() *mux.Router {
-	router := mux.NewRouter()
-	router.HandleFunc("/healthcheck", handlers.GetHealthCheck).Methods("GET")
-	return router
+func GetHealthCheckRouter(router fiber.Router) {
+	router.Get("/healthcheck", handlers.GetHealthCheck)
 }
