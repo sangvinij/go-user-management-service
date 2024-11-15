@@ -15,6 +15,8 @@ type config struct {
 	PORT               int
 	ELASTICSEARCH_HOST string
 	ELASTICSEARCH_PORT int
+	APP_VERSION        string
+	APP_HOST           string
 }
 
 func init() {
@@ -30,6 +32,8 @@ func (c *config) LoadConfig() {
 	c.PORT = c.getEnvAsInt("PORT", 8000)
 	c.ELASTICSEARCH_HOST = c.getEnv("ELASTICSEARCH_HOST", "http://localhost")
 	c.ELASTICSEARCH_PORT = c.getEnvAsInt("ELASTICSEARCH_PORT", 9200)
+	c.APP_VERSION = c.getEnv("APP_VERSION", "1.0.0")
+	c.APP_HOST = c.getEnv("APP_HOST", "localhost:8000")
 }
 
 func (c *config) getEnv(key string, defaultVal string) string {

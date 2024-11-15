@@ -1,17 +1,18 @@
-.PHONY: build
 build:
 	go build -v ./src/cmd/
 
-.PHONY: run
 run:
 	go run ./src/cmd
 
-.PHONY: docker-build
-docker-run:
+lint:
+	golangci-lint run
+
+format:
+	go fmt ./...
+	swag fmt .
+
+docker-build:
 	docker compose build
 
-.PHONY: docker-run
 docker-run:
 	docker compose up
-
-.DEFAULT_GOAL := run
