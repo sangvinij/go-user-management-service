@@ -1,0 +1,25 @@
+definitions:
+  healthcheck.ViewModelHealthCheck:
+    properties:
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: go user management service
+  title: User Management
+paths:
+  /um/healthcheck:
+    get:
+      description: Check if the service is healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/healthcheck.ViewModelHealthCheck'
+      summary: Health Check
+      tags:
+      - HealthCheck
+swagger: "2.0"

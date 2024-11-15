@@ -1,0 +1,40 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "go user management service",
+        "title": "User Management",
+        "contact": {}
+    },
+    "paths": {
+        "/um/healthcheck": {
+            "get": {
+                "description": "Check if the service is healthy",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HealthCheck"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/healthcheck.ViewModelHealthCheck"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "healthcheck.ViewModelHealthCheck": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
