@@ -33,8 +33,6 @@ func NewElasticHook(client *elasticsearch.Client, index string) (*ElasticHook, e
 		return nil, err
 	}
 
-	defer res.Body.Close()
-
 	if res.IsError() {
 		return nil, fmt.Errorf("elasticsearch status error: %s", res.String())
 	}
@@ -87,7 +85,6 @@ func (hook *ElasticHook) Fire(entry *logrus.Entry) error {
 	if err != nil {
 		return fmt.Errorf("error while sending logs to Elasticsearch: %w", err)
 	}
-	defer res.Body.Close()
 
 	if res.IsError() {
 		return fmt.Errorf("indexing Error in Elasticsearch: %s", res.String())
