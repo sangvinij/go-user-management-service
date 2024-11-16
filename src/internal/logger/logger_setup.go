@@ -18,17 +18,22 @@ func SetupLogger(file string, line int) *logrus.Logger {
 		log.SetLevel(level)
 	}
 
-	esClient, err := elasticsearch.NewElasticClient()
-	if err != nil {
-		log.Fatalf("elasticsearch client error: %v", err)
-	}
-
+	addElasticHook(log)
 	log.AddHook(GetLogHook(file, line))
 
-	hook, err := NewElasticHook(esClient, "go-logs")
-	if err != nil {
-		log.Fatalf("elasticsearch hook creation error: %v", err)
-	}
-	log.AddHook(hook)
 	return log
+}
+
+func addElasticHook(log *logrus.Logger) {
+	esClient, err := elasticsearch.NewElasticClient()
+	if err != nil {
+		log.Errorf("elasticsearch client error: %v", err)
+	} else {
+		hook, err := NewElasticHook(esClient, "go-logs")
+		if err != nil {
+			log.Errorf("elasticsearch hook creation error: %v", err)
+		} else {
+			log.AddHook(hook)
+		}
+	}
 }

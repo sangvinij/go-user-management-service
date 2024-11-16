@@ -1,15 +1,15 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
-	"os"
-	"strconv"
-	"strings"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
+	"log"
+	"time"
 )
 
-var AppConfig *config
+var AppConfig *Config
 
-type config struct {
+type Config struct {
 	LOGLEVEL           string
 	HOST               string
 	PORT               int
@@ -20,49 +20,42 @@ type config struct {
 }
 
 func init() {
-	AppConfig = &config{}
-	AppConfig.LoadConfig()
+	AppConfig = &Config{}
+	AppConfig.setupConfig()
 }
 
-func (c *config) LoadConfig() {
-	godotenv.Load()
-
-	c.LOGLEVEL = c.getEnv("LOG_LEVEL", "info")
-	c.HOST = c.getEnv("HOST", "0.0.0.0")
-	c.PORT = c.getEnvAsInt("PORT", 8000)
-	c.ELASTICSEARCH_HOST = c.getEnv("ELASTICSEARCH_HOST", "http://localhost")
-	c.ELASTICSEARCH_PORT = c.getEnvAsInt("ELASTICSEARCH_PORT", 9200)
-	c.APP_VERSION = c.getEnv("APP_VERSION", "1.0.0")
-	c.APP_HOST = c.getEnv("APP_HOST", "localhost:8000")
-}
-
-func (c *config) getEnv(key string, defaultVal string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
+func (c *Config) setupConfig() {
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Printf("can't load env vars")
+	} else {
+		err = viper.Unmarshal(&c)
+		if err != nil {
+			log.Printf("can't load env vars")
+		}
 	}
-	return defaultVal
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		go c.handleConfigChangeWithDelay()
+	})
 }
 
-func (c *config) getEnvAsInt(name string, defaultVal int) int {
-	valueStr := c.getEnv(name, "")
-	if value, err := strconv.Atoi(valueStr); err == nil {
-		return value
+func (c *Config) handleConfigChangeWithDelay() {
+	log.Printf("Change in env file detected, reloading config...")
+	time.Sleep(2 * time.Second)
+	err := viper.Unmarshal(&c)
+	if err != nil {
+		log.Printf("can't load env vars")
 	}
-	return defaultVal
+	log.Printf("Config reloaded")
 }
 
-func (c *config) getEnvAsBool(name string, defaultVal bool) bool {
-	valStr := c.getEnv(name, "")
-	if val, err := strconv.ParseBool(valStr); err == nil {
-		return val
+func (c *Config) getEnv(key string, defaultValue interface{}) interface{} {
+	if !viper.IsSet(key) {
+		return defaultValue
 	}
-	return defaultVal
-}
-
-func (c *config) getEnvAsSlice(name string, defaultVal []string, sep string) []string {
-	valStr := c.getEnv(name, "")
-	if valStr == "" {
-		return defaultVal
-	}
-	return strings.Split(valStr, sep)
+	return viper.Get(key)
 }
